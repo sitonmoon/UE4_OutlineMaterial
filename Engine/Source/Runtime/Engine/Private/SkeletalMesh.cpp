@@ -4999,6 +4999,7 @@ FSkeletalMeshSceneProxy::FSkeletalMeshSceneProxy(const USkinnedMeshComponent* Co
 #if WITH_EDITORONLY_DATA
 		,	StreamingDistanceMultiplier(FMath::Max(0.0f, Component->StreamingDistanceMultiplier))
 #endif
+		, OverlayMaterial(Component->OutlineMaterial)
 {
 	check(MeshObject);
 	check(SkeletalMeshRenderData);
@@ -5405,6 +5406,16 @@ void FSkeletalMeshSceneProxy::DrawStaticElements(FStaticPrimitiveDrawInterface* 
 					BatchElement.IndexBuffer = LODData.MultiSizeIndexContainer.GetIndexBuffer();
 													
 					PDI->DrawMesh(MeshElement, ScreenSize);
+
+					if (OverlayMaterial != nullptr)
+					{
+						FMeshBatch OverlayMeshBatch(MeshElement);
+						OverlayMeshBatch.CastShadow = false;
+						OverlayMeshBatch.bSelectable = false;
+						OverlayMeshBatch.ReverseCulling = true;
+						OverlayMeshBatch.MaterialRenderProxy = OverlayMaterial->GetRenderProxy();
+						PDI->DrawMesh(OverlayMeshBatch, FLT_MAX);
+					}
 				}
 			}
 		}
@@ -5687,6 +5698,17 @@ void FSkeletalMeshSceneProxy::GetDynamicElementsSection(const TArray<const FScen
 			INC_DWORD_STAT_BY(STAT_GPUSkinVertices,(uint32)(bIsCPUSkinned ? 0 : NumVertices));
 			INC_DWORD_STAT_BY(STAT_SkelMeshTriangles,Mesh.GetNumPrimitives());
 			INC_DWORD_STAT(STAT_SkelMeshDrawCalls);
+
+			if (OverlayMaterial != nullptr)
+			{
+				FMeshBatch& OverlayMeshBatch = Collector.AllocateMesh();
+				OverlayMeshBatch = Mesh;
+				OverlayMeshBatch.CastShadow = false;
+				OverlayMeshBatch.bSelectable = false;
+				OverlayMeshBatch.ReverseCulling = true;
+				OverlayMeshBatch.MaterialRenderProxy = OverlayMaterial->GetRenderProxy();
+				Collector.AddMesh(ViewIndex, OverlayMeshBatch);
+			}
 		}
 	}
 }

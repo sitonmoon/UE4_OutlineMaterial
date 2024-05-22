@@ -975,6 +975,8 @@ public:
 	virtual int32 GetLightMapResolution() const override { return LightMapResolution; }
 #endif
 
+	UMaterialInterface* OutlineMaterial;
+
 protected:
 	/** Information used by the proxy about a single LOD of the mesh. */
 	class FLODInfo : public FLightCacheInterface

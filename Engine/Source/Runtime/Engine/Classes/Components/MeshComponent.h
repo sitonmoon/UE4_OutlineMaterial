@@ -41,6 +41,9 @@ public:
 
 	/** Returns override Materials count */
 	virtual int32 GetNumOverrideMaterials() const;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Materials, Meta = (ToolTip = "ReverseCulling material used for outline."))
+	UMaterialInterface* OutlineMaterial;
 
 #if WITH_EDITOR
 	/*

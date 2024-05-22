@@ -164,6 +164,7 @@ FStaticMeshSceneProxy::FStaticMeshSceneProxy(UStaticMeshComponent* InComponent, 
 	, LODForCollision(InComponent->GetStaticMesh()->LODForCollision)
 	, bDrawMeshCollisionIfComplex(InComponent->bDrawMeshCollisionIfComplex)
 	, bDrawMeshCollisionIfSimple(InComponent->bDrawMeshCollisionIfSimple)
+	, OutlineMaterial(InComponent -> OutlineMaterial)
 #endif
 {
 	check(RenderData);
@@ -1132,6 +1133,16 @@ void FStaticMeshSceneProxy::DrawStaticElements(FStaticPrimitiveDrawInterface* PD
 						{
 							PDI->DrawMesh(BaseMeshBatch, FLT_MAX);
 						}
+
+						if (OutlineMaterial != nullptr)
+						{
+							FMeshBatch OverlayMeshBatch(BaseMeshBatch);
+							OverlayMeshBatch.CastShadow = false;
+							OverlayMeshBatch.ReverseCulling = true;
+							OverlayMeshBatch.bSelectable = false;
+							OverlayMeshBatch.MaterialRenderProxy = OutlineMaterial->GetRenderProxy();
+							PDI->DrawMesh(OverlayMeshBatch, FLT_MAX);
+						}
 					}
 				}
 			}
@@ -1255,6 +1266,16 @@ void FStaticMeshSceneProxy::DrawStaticElements(FStaticPrimitiveDrawInterface* PD
 								MeshBatch.bUseAsOccluder &= !bUseUnifiedMeshForDepth;
 								MeshBatch.bUseForDepthPass &= !bUseUnifiedMeshForDepth;
 								PDI->DrawMesh(MeshBatch, ScreenSize);
+							}
+
+							if (OutlineMaterial != nullptr)
+							{
+								FMeshBatch OverlayMeshBatch(BaseMeshBatch);
+								OverlayMeshBatch.CastShadow = false;
+								OverlayMeshBatch.ReverseCulling = true;
+								OverlayMeshBatch.bSelectable = false;
+								OverlayMeshBatch.MaterialRenderProxy = OutlineMaterial->GetRenderProxy();
+								PDI->DrawMesh(OverlayMeshBatch, FLT_MAX);
 							}
 						}
 					}
