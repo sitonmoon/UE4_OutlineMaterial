@@ -5111,6 +5111,17 @@ FSkeletalMeshSceneProxy::FSkeletalMeshSceneProxy(const USkinnedMeshComponent* Co
 					));
 			MaterialsInUse_GameThread.Add(Material);
 		}
+
+		//SkeletalMesh检查Material的Usage是否正确,避免未勾选"Used with Skeletal mesh"引发编辑器崩溃
+		UMaterialInterface* MaterialInterfaceOverlay = Component->OutlineMaterial;
+		if (MaterialInterfaceOverlay != nullptr)
+		{
+			if (!MaterialInterfaceOverlay->CheckMaterialUsage_Concurrent(MATUSAGE_SkeletalMesh))
+			{
+				MaterialInterfaceOverlay = UMaterial::GetDefaultMaterial(MD_Surface);
+				UE_LOG(LogSkeletalMesh, Error, TEXT("Overlay material with missing usage flag was applied to skeletal mesh %s"), *Component->SkeletalMesh->GetPathName());
+			}
+		}
 	}
 
 	bCastDynamicShadow = bCastDynamicShadow && bAnySectionCastsShadow;
